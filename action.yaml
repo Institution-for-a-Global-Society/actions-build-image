@@ -13,17 +13,17 @@ inputs:
     require: true
   deploy_ssh_key:
     default: ""
-  k8s_manifest_repo:
+  k8s_repo:
     require: true
-  k8s_manifest_repo_ref:
+  k8s_repo_ref:
     require: true
-  k8s_manifest_dir:
+  k8s_dir:
     require: true
-  k8s_manifest_file:
+  k8s_file:
     require: true
-  k8s_manifest_metadata_name:
+  k8s_metadata_name:
     require: true
-  k8s_manifest_container_name:
+  k8s_container_name:
     require: true
   target: 
     require: true
@@ -82,10 +82,10 @@ runs:
     - name: Checkout task definition repository
       uses: actions/checkout@v3
       with:
-        repository: ${{ github.repository_owner }}/${{ inputs.k8s_manifest_repo }}
-        ref: ${{ inputs.k8s_manifest_repo_ref }}
+        repository: ${{ github.repository_owner }}/${{ inputs.k8s_repo }}
+        ref: ${{ inputs.k8s_repo_ref }}
         token: ${{ inputs.git_personal_access_token }}
-        path: ${{ inputs.k8s_manifest_repo }}
+        path: ${{ inputs.k8s_repo }}
 
     - name: Update kubernetes manifest
       uses: nick-fields/retry@v2
@@ -95,14 +95,14 @@ runs:
         retry_on: error
         shell: bash
         command: |
-          cd ${{ inputs.k8s_manifest_repo }}/${{ inputs.k8s_manifest_dir }}
+          cd ${{ inputs.k8s_repo }}/${{ inputs.k8s_dir }}
           git config --local user.email ${{ inputs.git_user_email }}
           git config --local user.name ${{ inputs.git_user_name }}
           git config pull.rebase false
           IMAGE_URL=${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:${{ inputs.target_image_tag }}
-          yq '(select(.kind == "Deployment" and .metadata.name == "${{ inputs.k8s_manifest_metadata_name }}") | .spec.template.spec.containers[] | select(.name == "${{ inputs.k8s_manifest_container_name }}") | .image) |= "$IMAGE_URL"' -i ${{ inputs.k8s_manifest_file }} 
-          cat ${{ inputs.k8s_manifest_file }}
+          yq '(select(.kind == "Deployment" and .metadata.name == "${{ inputs.k8s_metadata_name }}") | .spec.template.spec.containers[] | select(.name == "${{ inputs.k8s_container_name }}") | .image) |= "$IMAGE_URL"' -i ${{ inputs.k8s_file }} 
+          cat ${{ inputs.k8s_file }}
           git pull
-          git add ${{ inputs.k8s_manifest_file }}
-          git commit -m "[UpdateImageTag] ${{ inputs.k8s_manifest_dir }}/${{ inputs.k8s_manifest_file }} ${{ inputs.k8s_manifest_container_name }} ${{ inputs.target_image_tag }}"
+          git add ${{ inputs.k8s_file }}
+          git commit -m "[UpdateImageTag] ${{ inputs.k8s_dir }}/${{ inputs.k8s_file }} ${{ inputs.k8s_container_name }} ${{ inputs.target_image_tag }}"
           git push
