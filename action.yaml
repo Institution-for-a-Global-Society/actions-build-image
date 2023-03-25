@@ -100,7 +100,7 @@ runs:
           git config --local user.name ${{ inputs.git_user_name }}
           git config pull.rebase false
           IMAGE_URL=${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:${{ inputs.target_image_tag }}
-          yq '(select(.kind == "Deployment" and .metadata.name == "${{ inputs.k8s_metadata_name }}") | .spec.template.spec.containers[] | select(.name == "${{ inputs.k8s_container_name }}") | .image) |= '$IMAGE_URL -i ${{ inputs.k8s_file }} 
+          yq '(select(.kind == "Deployment" and .metadata.name == "${{ inputs.k8s_metadata_name }}") | .spec.template.spec.containers[] | select(.name == "${{ inputs.k8s_container_name }}") | .image) |= env(IMAGE_URL)' -i ${{ inputs.k8s_file }} 
           cat ${{ inputs.k8s_file }}
           git pull
           git add ${{ inputs.k8s_file }}
