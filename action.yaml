@@ -17,9 +17,7 @@ inputs:
     require: true
   k8s_repo_ref:
     require: true
-  k8s_dir:
-    require: true
-  k8s_file:
+  k8s_paths:
     require: true
   k8s_metadata_name:
     require: true
@@ -95,14 +93,17 @@ runs:
         retry_on: error
         shell: bash
         command: |
-          cd ${{ inputs.k8s_repo }}/${{ inputs.k8s_dir }}
+          cd ${{ inputs.k8s_repo }}
           git config --local user.email ${{ inputs.git_user_email }}
           git config --local user.name ${{ inputs.git_user_name }}
           git config pull.rebase false
           IMAGE_URL=${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:${{ inputs.target_image_tag }}
-          yq '(select(.kind == "Deployment" and .metadata.name == "${{ inputs.k8s_metadata_name }}") | .spec.template.spec.containers[] | select(.name == "${{ inputs.k8s_container_name }}") | .image) |= "'$IMAGE_URL'"' -i ${{ inputs.k8s_file }} 
-          cat ${{ inputs.k8s_file }}
           git pull
-          git add ${{ inputs.k8s_file }}
-          git commit -m "[UpdateImageTag] ${{ inputs.k8s_dir }}/${{ inputs.k8s_file }} ${{ inputs.k8s_container_name }} ${{ inputs.target_image_tag }}"
+          for k8s_path in "${inputs.k8s_paths[@]}" ; do
+            echo $k8s_path
+            cat $k8s_path
+            yq '(select(.kind == "Deployment" and .metadata.name == "${{ inputs.k8s_metadata_name }}") | .spec.template.spec.containers[] | select(.name == "${{ inputs.k8s_container_name }}") | .image) |= "'$IMAGE_URL'"' -i $k8s_path 
+            git add $k8s_path
+            git commit -m "[UpdateImageTag] $k8s_path ${{ inputs.k8s_container_name }} ${{ inputs.target_image_tag }}"
+          done
           git push
