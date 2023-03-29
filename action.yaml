@@ -20,7 +20,8 @@ inputs:
 outputs:
   target_image_url:
     description: "Image URL"
-    value: ${{ steps.build.outputs.target_image_url }}
+    # value: ${{ steps.build.outputs.target_image_url }}
+    value: RRRRRRRRRRRRRRR
 runs:
   using: "composite"
   steps:
