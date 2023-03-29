@@ -44,7 +44,7 @@ runs:
         # Image URL
         GITSHA_IMAGE_URL=${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:${{ inputs.gitsha_image_tag }}
         TARGET_IMAGE_URL=${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:${{ inputs.target_image_tag }}
-        echo "target_image_url=$(echo kkk)" >> $GITHUB_OUTPUT
+        echo "target_image_url=kkk" >> $GITHUB_OUTPUT
         echo $GITHUB_OUTPUT
         cat $GITHUB_OUTPUT
         # SSHエージェント起動
