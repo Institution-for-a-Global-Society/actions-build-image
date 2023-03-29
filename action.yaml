@@ -18,9 +18,9 @@ inputs:
   target_image_tag:
     require: true
 outputs:
-  target_image_url: BBBBBBBBB
-    # value: ${{ steps.build.outputs.target_image_url }}
-    # value: RRRRRRRRRRRRRRR
+  target_image_url:
+    description: "Image URL"
+    value: ${{ steps.build.outputs.target_image_url }}
 runs:
   using: "composite"
   steps:
