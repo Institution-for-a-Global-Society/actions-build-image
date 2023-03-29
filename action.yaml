@@ -17,7 +17,10 @@ inputs:
     require: true
   target_image_tag:
     require: true
-
+outputs:
+  target_image_url:
+    description: "Image URL"
+    value: ${{ steps.build.outputs.target_image_url }}
 runs:
   using: "composite"
   steps:
@@ -41,6 +44,7 @@ runs:
         # Image URL
         GITSHA_IMAGE_URL=${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:${{ inputs.gitsha_image_tag }}
         TARGET_IMAGE_URL=${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:${{ inputs.target_image_tag }}
+        echo "target_image_url=$(echo $TARGET_IMAGE_URL)" >> $GITHUB_OUTPUT
         # SSHエージェント起動
         eval "$(ssh-agent)"
         # SSHエージェントにキーを登録
